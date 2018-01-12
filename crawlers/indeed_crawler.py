@@ -16,14 +16,14 @@ class IndeedCrawler:
 
     def parse_result_list(self, response):
         """
-        parse_result_list method to parse the index urls of job entries
-        from search result page response.
+        parse_result_list method to parse the list of job entries
+        from search result page response and return next page link.
         Args:
             response (requests.models.Response): http response object with
             html content and other info required to parse the page.
 
         Returns:
-            List: job index urls list if successful, None otherwise.
+            String: next page url link if exists, None otherwise.
         """
         try:
             soup = BeautifulSoup(response.content)
