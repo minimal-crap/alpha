@@ -16,14 +16,14 @@ class IndeedCrawler:
 
     def parse_result_list(self, response):
         """
-        parse_result_list method to parse the list of job entries
-        from search result page response and return next page link.
+        parse_result_list method to parse the index urls of job entries
+        from search result page response.
         Args:
             response (requests.models.Response): http response object with
             html content and other info required to parse the page.
 
         Returns:
-            String: next page url link if exists, None otherwise.
+            List: job index urls list if successful, None otherwise.
         """
         try:
             soup = BeautifulSoup(response.content)
@@ -32,26 +32,44 @@ class IndeedCrawler:
             for row_element in job_list:
                 if 'jslast' not in row_element.get('class'):
                     job_params['source'] = 'indeed'
-                    job_params['title'] = row_element.find(
-                        'a', {'data-tn-element': 'jobTitle'}).get_text()
+                    title_element = row_element.find(
+                        'a', {'data-tn-element': 'jobTitle'})
+                    if title_element is not None:
+                        job_params['title'] = title_element.get_text()
+                    else:
+                        job_params['title'] = 'N/A'
                     job_params['url'] = row_element.find(
                         'a', {'data-tn-element': 'jobTitle'}).get('href')
-                    job_params['description'] = row_element.find(
-                        'span', {'class': 'summary'}).get_text().strip()
+                    description_element = row_element.find(
+                        'span', {'class': 'summary'})
+                    if description_element is not None:
+                        job_params['description'] = description_element.get_text(
+                        ).strip()
+                    else:
+                        job_params['description'] = 'N/A'
                     job_params['job_type'] = 'N/A'
                     job_params['image'] = 'N/A'
                     location_list = row_element.find(
                         'span',
-                        {'class': 'location'}).get_text().strip().split(',')
-                    if len(location_list) == 1:
-                        job_params['city'] = location_list[0]
-                        job_params['state'] = location_list[0]
-                    elif len(location_list) == 2:
-                        job_params['city'] = location_list[0]
-                        job_params['state'] = location_list[1]
+                        {'class': 'location'})
+                    if location_list is not None:
+                        location_list = location_list.get_text().strip().split(',')
+                        if len(location_list) == 1:
+                            job_params['city'] = location_list[0]
+                            job_params['state'] = location_list[0]
+                        elif len(location_list) == 2:
+                            job_params['city'] = location_list[0]
+                            job_params['state'] = location_list[1]
+                    else:
+                        job_params['city'] = 'N/A'
+                        job_params['state'] = 'N/A'
                     job_params['how_to_apply'] = 'N/A'
-                    job_params['author'] = row_element.find(
-                        'span', {'class': 'company'}).get_text().strip()
+                    company_element = row_element.find(
+                        'span', {'class': 'company'})
+                    if company_element is not None:
+                        job_params['author'] = company_element.get_text().strip()
+                    else:
+                        job_params['author'] = 'N/A'
                     date_string = row_element.find(
                         'span', {'class': 'date'})
                     if date_string is not None:

@@ -67,12 +67,12 @@ which will take care of creating required database tables.
 python models.py
 ```
 
-- to ensure that there are no unicode errors while storing data in mysql db, login to
-mysql server, switch to your database and run below command to change the chart set of
-description column.
+- to ensure that there are no unicode errors while storing data in mysql db, switch
+to project directory and run /crawlers/change_charset.sql against your mysql server like
+below.
 
-```sql
-alter table job modify column description text character set utf8mb4 collate utf8mb4_unicode_ci not null;
+```sh
+mysql -u <user> -D <database> -p < /crawlers/change_charset.sql
 ```
 
 - all setup, the crawler is now deployed.
