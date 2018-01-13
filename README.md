@@ -72,7 +72,7 @@ to project directory and run /crawlers/change_charset.sql against your mysql ser
 below.
 
 ```sh
-mysql -u <user> -D <database> -p < /crawlers/change_charset.sql
+mysql -u <user> -D <database> -p < crawlers/change_charset.sql
 ```
 
 - all setup, the crawler is now deployed.
