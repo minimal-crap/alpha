@@ -23,6 +23,7 @@ a test crawler project to demonstrate crawling using python requests and beautif
 - PyMySQL==0.8.0
 - requests==2.18.4
 - SQLAlchemy==1.2.0
+- ipdb==0.10.3
 
 ## deployment
 
