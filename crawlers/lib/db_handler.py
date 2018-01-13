@@ -35,7 +35,6 @@ class HandleDB:
             Job object if successful, None otherwise.
         """
         try:
-            job_params['uuid'] = str(uuid.uuid4())
             current_job = Job(**job_params)
             self.session_instance.add(current_job)
             self.session_instance.commit()

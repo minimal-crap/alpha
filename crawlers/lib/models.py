@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import(Column, String, Text, DateTime)
+from sqlalchemy import(Column, Integer, String, Text, DateTime)
 from sqlalchemy import create_engine
 
 from settings import MYSQL_DATABASE_URL, MYSQL_DB
@@ -13,7 +13,7 @@ class Job(Base):
     Model class for Job entries fetched from different websites.
     """
     __tablename__ = "job"
-    uuid = Column(String(128), primary_key=True)
+    job_id = Column(Integer, primary_key=True)
     source = Column(String(256))
     url = Column(String(256))
     title = Column(String(256))

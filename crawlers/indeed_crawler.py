@@ -13,6 +13,9 @@ class IndeedCrawler:
     def __init__(self):
         self.hdb_instance = HandleDB()
         self.http_session = rq.Session()
+        self.indeed_seed_url = "https://www.indeed.com/jobs?as_and={}\
+        &as_phr=&as_any=&as_not=&as_ttl=&as_cmp=&jt=all&st=&salary=\
+        &radius=25&l=&fromage=15&limit=20&sort=date&psf=advsrch"
 
     def parse_result_list(self, response):
         """
@@ -38,8 +41,9 @@ class IndeedCrawler:
                         job_params['title'] = title_element.get_text()
                     else:
                         job_params['title'] = 'N/A'
-                    job_params['url'] = row_element.find(
-                        'a', {'data-tn-element': 'jobTitle'}).get('href')
+                    job_params['url'] = 'http://www.indeed.com{}'.format(
+                        row_element.find(
+                            'a', {'data-tn-element': 'jobTitle'}).get('href'))
                     description_element = row_element.find(
                         'span', {'class': 'summary'})
                     if description_element is not None:
@@ -70,16 +74,24 @@ class IndeedCrawler:
                         job_params['author'] = company_element.get_text().strip()
                     else:
                         job_params['author'] = 'N/A'
-                    date_string = row_element.find(
+                    date_element = row_element.find(
                         'span', {'class': 'date'})
-                    if date_string is not None:
-                        date_string = date_string.get_text().strip().split()[0]
-                        if '+' not in date_string:
-                            posted_at = datetime.today() - \
-                                timedelta(days=int(date_string))
-                            job_params['posted_at'] = posted_at
+                    if date_element is not None:
+                        date_string = date_element.get_text().lower()
+                        # checking for jobs posted today
+                        if date_string.find('today') != -1 or date_string.find(
+                                'just posted') != -1:
+                            job_params['posted_at'] = datetime.today()
                         else:
-                            job_params['posted_at'] = None
+                            date_string = date_element.get_text().strip().split()[
+                                0]
+                        # for jobs posted later than today
+                            if '+' not in date_string:
+                                posted_at = datetime.today() - \
+                                    timedelta(days=int(date_string))
+                                job_params['posted_at'] = posted_at
+                            else:
+                                job_params['posted_at'] = None
                     current_instance_job = self.hdb_instance.create_job(
                         **job_params)
                     if current_instance_job is not None:
@@ -96,6 +108,8 @@ class IndeedCrawler:
             else:
                 return None
         except Exception as error:
+            import ipdb
+            ipdb.set_trace()
             print(error.message)
             return None
 
@@ -103,12 +117,11 @@ class IndeedCrawler:
         keyword_list = ['weed', 'marijuana', 'cannabis']
         for keyword in keyword_list:
             crawl_next_page = True
-            seed_url = "https://www.indeed.com/jobs?q={}&start=0".format(
-                keyword)
             self.http_session.headers['User-Agent'] = random.choice(
                 USER_AGENT_LIST)
             response = None
-            response = self.http_session.get(seed_url, proxies=PROXIES)
+            response = self.http_session.get(
+                self.indeed_seed_url.format(keyword), proxies=PROXIES)
             next_page_url = self.parse_result_list(response)
 
             # iterating starting from seed url and fetching next
