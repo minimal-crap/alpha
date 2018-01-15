@@ -3,6 +3,7 @@ import uuid
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import DeclarativeMeta
+from sqlalchemy.exc import IntegrityError
 
 from settings import MYSQL_DATABASE_URL
 from models import Job
@@ -39,9 +40,13 @@ class HandleDB:
             self.session_instance.add(current_job)
             self.session_instance.commit()
             return current_job
+        except IntegrityError:
+            print("duplicate detected... passing on to next entry")
+            self.session_instance.rollback()
+            return None
         except Exception as error:
-            import ipdb; ipdb.set_trace()
             print(error.message)
+            self.session_instance.rollback()
             return None
 
     def list_job(self, **query_params):

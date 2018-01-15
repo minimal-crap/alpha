@@ -15,7 +15,7 @@ class Job(Base):
     __tablename__ = "job"
     job_id = Column(Integer, primary_key=True)
     source = Column(String(256))
-    url = Column(String(256))
+    url = Column(String(256), unique=True)
     title = Column(String(256))
     description = Column(Text)
     image = Column(String(256))
